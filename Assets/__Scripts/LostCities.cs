@@ -1253,4 +1253,41 @@ public class LostCities : MonoBehaviour
         }
 
     }
+
+    public void GameOver()
+    {
+        int player1Score = 0;
+        int player2Score = 0;
+        int player1RMultiplier = 0;
+        int player1GMultiplier = 0;
+        int player1WMultiplier = 0;
+        int player1BMultiplier = 0;
+        int player1YMultiplier = 0;
+        int player2RMultiplier = 0;
+        int player2GMultiplier = 0;
+        int player2WMultiplier = 0;
+        int player2BMultiplier = 0;
+        int player2YMultiplier = 0;
+
+        player1RMultiplier = Score.S.Multiplier(redPlayer1);
+        player1GMultiplier = Score.S.Multiplier(greenPlayer1);
+        player1WMultiplier = Score.S.Multiplier(whitePlayer1);
+        player1BMultiplier = Score.S.Multiplier(bluePlayer1);
+        player1YMultiplier = Score.S.Multiplier(yellowPlayer1);
+        player1Score = player1Score + player1RMultiplier * Score.S.ComputeScore(redPlayer1);
+        player1Score = player1Score + player1GMultiplier * Score.S.ComputeScore(greenPlayer1);
+        player1Score = player1Score + player1WMultiplier * Score.S.ComputeScore(whitePlayer1);
+        player1Score = player1Score + player1BMultiplier * Score.S.ComputeScore(bluePlayer1);
+        player1Score = player1Score + player1YMultiplier * Score.S.ComputeScore(yellowPlayer1);
+        player2RMultiplier = Score.S.Multiplier(redPlayer2);
+        player2GMultiplier = Score.S.Multiplier(greenPlayer2);
+        player2WMultiplier = Score.S.Multiplier(whitePlayer2);
+        player2BMultiplier = Score.S.Multiplier(bluePlayer2);
+        player2YMultiplier = Score.S.Multiplier(yellowPlayer2);
+        player2Score = player2Score + player2RMultiplier * Score.S.ComputeScore(redPlayer2);
+        player2Score = player2Score + player2GMultiplier * Score.S.ComputeScore(greenPlayer2);
+        player2Score = player2Score + player2WMultiplier * Score.S.ComputeScore(whitePlayer2);
+        player2Score = player2Score + player2BMultiplier * Score.S.ComputeScore(bluePlayer2);
+        player2Score = player2Score + player2YMultiplier * Score.S.ComputeScore(yellowPlayer2);
+    }
 }

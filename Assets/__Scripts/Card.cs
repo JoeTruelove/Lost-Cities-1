@@ -8,6 +8,8 @@ public class Card : MonoBehaviour {
     public int rank; // Rank of the Card (1-14)
     public Color color = Color.black; // Color to tint pips
     public string colS = "Black"; // Or "Red", Name of the Color
+    
+    
 
     // This List holds all of the Decorator GameObjects
     public List<GameObject> decoGOs = new List<GameObject>();
@@ -24,6 +26,7 @@ public class Card : MonoBehaviour {
     private void Start()
     {
         SetSortOrder(0); // Ensures that the card starts properly depth sorted
+        
     }
 
     //If SpriteRenderers is not yet defined, this function defines it
@@ -69,7 +72,7 @@ public class Card : MonoBehaviour {
             {
                 case "back": // If the name is "back"
                     // Set it to the highest layer to cover the other sprites
-                    tSR.sortingOrder = sOrd + 2;
+                    tSR.sortingOrder = sOrd + 4;
                     break;
 
                 case "face": // If the name is "face"
@@ -81,11 +84,13 @@ public class Card : MonoBehaviour {
         }
     }
 
+    
+
     public bool faceUp
     {
         get
         {
-            return (!back.activeSelf);
+            return (back.activeSelf);
         }
         set
         {

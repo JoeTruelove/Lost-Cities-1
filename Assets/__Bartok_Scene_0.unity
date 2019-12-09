@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465782, g: 0.49641252, b: 0.5748167, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -650,7 +650,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b69c28581428da469438d7d5901b8ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startFaceUp: 1
+  startFaceUp: 0
   suitRed: {fileID: 0}
   suitGreen: {fileID: 0}
   suitWhite: {fileID: 0}
@@ -775,9 +775,13 @@ MonoBehaviour:
   players: []
   targetCard: {fileID: 0}
   targetKeepCard: {fileID: 0}
+  lastPlayedCard: {fileID: 0}
   phase: 0
   firstCard: 0
   popUp: 0
+  playerTurn: 1
+  played: 0
+  glow: 0
 --- !u!114 &1382180771
 MonoBehaviour:
   m_ObjectHideFlags: 0

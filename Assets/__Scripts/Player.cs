@@ -11,13 +11,14 @@ public enum PlayerType
 }
 
 [System.Serializable]
-public class Player {
+public class Player
+{
     public PlayerType type = PlayerType.human;
     public int playerNum;
     public SlotDef handSlotDef;
     public List<CardLostCities> hand; // The cards in this player's hand
 
-	// Add a card to the hand
+    // Add a card to the hand
     public CardLostCities AddCard(CardLostCities eCB)
     {
         if (hand == null) hand = new List<CardLostCities>();
@@ -32,7 +33,7 @@ public class Player {
 
             // This is the LINQ call
             cards = cards.OrderBy(cd => cd.rank).ToArray();
-            
+
 
             hand = new List<CardLostCities>(cards);
             // Note: LINQ operations can be a bit slow (like it could take a
@@ -42,7 +43,7 @@ public class Player {
 
         eCB.SetSortingLayerName("10"); // Sorts the moving card to the top
         eCB.eventualSortLayer = handSlotDef.layerName;
-
+        eCB.faceUp = false;
         FanHand();
         return (eCB);
     }
@@ -67,10 +68,10 @@ public class Player {
     public void FanHand()
     {
         // startRot is the rotation about Z of the first card
-        
+
         float startRot = 0;
         startRot = handSlotDef.rot;
-        if(hand.Count > 1)
+        if (hand.Count > 1)
         {
             startRot += LostCities.S.handFanDegrees * (hand.Count - 1) / 2;
         }
@@ -79,7 +80,7 @@ public class Player {
         Vector3 pos;
         float rot;
         Quaternion rotQ;
-        for (int i=0; i<hand.Count; i++)
+        for (int i = 0; i < hand.Count; i++)
         {
             rot = startRot - LostCities.S.handFanDegrees * i;
             rotQ = Quaternion.Euler(0, 0, rot);
@@ -93,17 +94,17 @@ public class Player {
             pos += handSlotDef.pos;
             //    pos.z = -0.5f * i;
             Debug.Log(i);
-            
-            pos.x =2.75f*i - 9.5f;
-            
 
-            
+            pos.x = 2.75f * i - 9.5f;
+
+
+
             // If not the initial deal, start moving the card immediately.
-            if(LostCities.S.phase != TurnPhase.idle)
+            if (LostCities.S.phase != TurnPhase.idle)
             {
                 hand[i].timeStart = 0;
             }
-            
+
             // Set the localPosition and rotation of the ith card in the hand
             hand[i].MoveTo(pos, rotQ); // Tell CardLostCities to interpolate
             hand[i].state = CBState.toHand;
@@ -114,14 +115,13 @@ public class Player {
             hand[i].transform.rotation = rotQ;
             hand[i].state = CBState.hand; 
             This ends the multiline comment => */
-            if(type == PlayerType.human)
-            {
-                hand[i].faceUp = (type == PlayerType.human);
-            }
-            else if (type == PlayerType.ai)
-            {
-                hand[i].faceUp = (type == PlayerType.ai);
-            }
+
+            hand[i].faceUp = (type == PlayerType.human);
+
+            //else if (type == PlayerType.ai)
+            //{
+            //    hand[i].faceUp = (type == PlayerType.ai);
+            //}
 
             // Set the SortOrder of the cards so that they overlap properly
             hand[i].eventualSortOrder = i * 4;
@@ -148,16 +148,18 @@ public class Player {
         List<CardLostCities> cardtoPlay = new List<CardLostCities>();
         foreach (CardLostCities tCB in hand)
         {
+            Debug.Log("DISCARD COUNT " + discardCards.Count);
+
             if (tCB.rank != 1)
             {
                 if (LostCities.S.drawPile.Capacity > 6)
                 {
 
-                    if (tCB.rank > LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank)
+                    if (LostCities.S.ValidPlay(tCB))
                     {
                         validCards.Add(tCB);
 
-                        if (tCB.rank == LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank + 1)
+                        if (LostCities.S.DifferencePlay(tCB) == 1)
                         {
                             tCB.setWeight(tCB.getWeight() + 2);
 
@@ -168,7 +170,7 @@ public class Player {
                         }
                         else
                         {
-                            if (tCB.rank < LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank + 6)
+                            if (LostCities.S.DifferencePlay(tCB) > 5)
                             {
                                 tCB.setWeight(tCB.getWeight() + 1);
                             }
@@ -186,9 +188,9 @@ public class Player {
                 }
                 else
                 {
-                    if (tCB.rank > LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank)
+                    if (LostCities.S.ValidPlay(tCB))
                     {
-                        if (tCB.rank == LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank + 1)
+                        if (LostCities.S.DifferencePlay(tCB) == 1)
                         {
                             tCB.setWeight(tCB.getWeight() + 1);
 
@@ -196,7 +198,7 @@ public class Player {
                         }
                         else
                         {
-                            if (tCB.rank > LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank + 6)
+                            if (LostCities.S.DifferencePlay(tCB) > 1)
                             {
                                 tCB.setWeight(tCB.getWeight() + 1);
 
@@ -257,45 +259,58 @@ public class Player {
 
 
 
-            } else {
+            }
+            else
+            {
                 int sameSuit = 0;
-                foreach (CardLostCities tCK in hand) { 
+                foreach (CardLostCities tCK in hand)
+                {
                     if (tCK.suit.Equals(tCB.suit))
-                    { 
+                    {
                         sameSuit++;
                     }
                 }
-                if (tCB.rank < LostCities.S.WhichAIDiscard(tCB)[LostCities.S.WhichAIDiscard(tCB).Count - 1].rank)
+                if (!LostCities.S.ValidPlay(tCB))
                     discardCards.Add(tCB);
-                else if (sameSuit >= 1) { 
-                    tCB.setWeight(3);
+                else if (sameSuit >= 1)
+                {
+                    tCB.setWeight(4);
                     validCards.Add(tCB);
                 }
-                else if (sameSuit == 1) { 
+                else if (sameSuit == 1)
+                {
                     tCB.setWeight(2);
                     validCards.Add(tCB);
                 }
-                else if (sameSuit == 0) { 
+                else if (sameSuit == 0)
+                {
                     tCB.setWeight(1);
                     validCards.Add(tCB);
                 }
             }
-        } 
-        
+        }
+
         // If there are no valid cards
         if (validCards.Count == 0)
         {
             CardLostCities tB = discardCards[Random.Range(0, discardCards.Count)];
-            LostCities.S.MoveToDiscard(tB);
+            LostCities.S.MoveToDiscardForAI(tB);
             return;
         }
         else
         {
-            
+
             int highestWeight = 0;
-            foreach (CardLostCities tCM in validCards)
+
+            foreach (CardLostCities tCM in validCards.ToList())
             {
-                if (tCM.getWeight() > cardtoPlay[0].getWeight())
+                Utils.tr("Card:" + cardtoPlay.Count);
+                if (cardtoPlay.Count == 0)
+                {
+                    highestWeight = tCM.getWeight();
+                    cardtoPlay.Add(tCM);
+                }
+                else if (tCM.getWeight() > cardtoPlay[0].getWeight())
                 {
                     highestWeight = tCM.getWeight();
                     validCards.Add(cardtoPlay[0]);
@@ -306,10 +321,16 @@ public class Player {
             {
                 cb = cardtoPlay[0];
                 LostCities.S.MoveToAIDiscard(cb);
-            } else {
+            }
+            else if (discardCards.Count > 0)
+            {
                 CardLostCities tB = discardCards[Random.Range(0, discardCards.Count)];
-                LostCities.S.MoveToDiscard(tB);
-                return;
+                LostCities.S.MoveToDiscardForAI(tB);
+            }
+            else
+            {
+                cb = cardtoPlay[0];
+                LostCities.S.MoveToAIDiscard(cb);
             }
         }
         // So, there is a card or more to play, so pick one

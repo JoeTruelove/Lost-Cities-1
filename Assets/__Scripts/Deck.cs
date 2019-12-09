@@ -359,7 +359,7 @@ public class Deck : MonoBehaviour {
         _tGO.transform.SetParent(card.transform);
         _tGO.transform.localPosition = Vector3.zero;
         // This is a higher sortingOrder than anything else
-        _tSR.sortingOrder = 2;
+        _tSR.sortingOrder = 4;
         _tGO.name = "back";
         card.back = _tGO;
         // Default to face-up

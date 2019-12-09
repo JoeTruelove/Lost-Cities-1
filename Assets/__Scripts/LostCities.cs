@@ -50,6 +50,8 @@ public class LostCities : MonoBehaviour
     public List<Player> players;
     public CardLostCities targetCard;
     public CardLostCities targetKeepCard;
+    public CardLostCities lastPlayedCard;
+
 
     public TurnPhase phase = TurnPhase.idle;
     public int firstCard = 0;
@@ -57,6 +59,7 @@ public class LostCities : MonoBehaviour
     public bool popUp = false;
     public bool playerTurn = true;
     public bool played = false;
+    public bool glow = false;
 
     private BartokLayout layout;
     private Transform layoutAnchor;
@@ -79,14 +82,25 @@ public class LostCities : MonoBehaviour
 
         drawPile = UpgradeCardsList(deck.cards);
         LayoutGame();
+        FixFace();
+    }
+
+    public void FixFace()
+    {
+        for(int i=0; i<players[1].hand.Count; i++)
+        {
+            players[1].hand[i].faceUp = false;
+        }
+        
     }
 
     private void Update()
     {
-        if(!playerTurn)
+        if (!playerTurn)
         {
             playAI();
             players[1].AddCard(Draw());
+            FixFace();
         }
     }
 
@@ -132,7 +146,7 @@ public class LostCities : MonoBehaviour
             tCB = redPlayer1[i];
             tCB.transform.SetParent(layoutAnchor);
             //tCB.transform.localPosition = layout.redPlayer1.pos;
-            
+
             Vector2 dpStagger = layout.redPlayer1.stagger;
             tCB.transform.localPosition = new Vector3(
                 layout.multiplier.x * (layout.redPlayer1.x + i * dpStagger.x),
@@ -141,7 +155,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.redPlayer1.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            tCB.state = CBState.target;
+            tCB.state = CBState.player1;
         }
         for (int i = 0; i < greenPlayer1.Count; i++)
         {
@@ -214,11 +228,11 @@ public class LostCities : MonoBehaviour
         CardLostCities tCB;
         for (int i = 0; i < redPlayer2.Count; i++)
         {
-            
+
             tCB = redPlayer2[i];
             tCB.transform.SetParent(layoutAnchor);
             tCB.transform.localPosition = layout.redPlayer2.pos;
-            
+
             Vector2 dpStagger = layout.redPlayer2.stagger;
             tCB.transform.localPosition = new Vector3(
                 layout.multiplier.x * (layout.redPlayer2.x + i * dpStagger.x),
@@ -227,7 +241,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.redPlayer2.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            if(tCB.transform.rotation == Quaternion.Euler(Vector3.zero))
+            if (tCB.transform.rotation == Quaternion.Euler(Vector3.zero))
             {
                 tCB.transform.Rotate(180, 0, 0);
             }
@@ -338,6 +352,7 @@ public class LostCities : MonoBehaviour
             pl.handSlotDef = tSD;
             players.Add(pl);
             pl.playerNum = tSD.player;
+
         }
         players[0].type = PlayerType.human; // Make only the 0th player human
         Debug.Log(players[1].type);
@@ -349,17 +364,22 @@ public class LostCities : MonoBehaviour
             {
                 
                 tCB = Draw(); // Draw a card
+                
                 // Stagger the draw time a bit.
                 tCB.timeStart = Time.time + drawTimeStagger * (i * 4 + j);
-                
+
                 players[j].AddCard(tCB);
+                
+                        
             }
+
+
         }
 
         //Invoke("DrawFirstTarget", drawTimeStagger * (numStartingCards * 4 + 4));
     }
 
-    
+
 
     // This callback is used by the last card to be dealt at the beginning
     public void CBCallback(CardLostCities cb)
@@ -375,7 +395,7 @@ public class LostCities : MonoBehaviour
         //PassTurn(1);
     }
 
-    public void PassTurn(int num=-1)
+    public void PassTurn(int num = -1)
     {
         Utils.tr("LostCities:PassTurn()", "Current Player: " + players.IndexOf(CURRENT_PLAYER));
         int lastPlayerNum = 0;
@@ -404,7 +424,7 @@ public class LostCities : MonoBehaviour
         Utils.tr("LostCities:PassTurn()", "Old: " + lastPlayerNum, "New: " + CURRENT_PLAYER.playerNum);
     }
 
-    
+
     public bool CheckGameOver()
     {
         // See if we need to reshuffle the discard pile into the draw pile
@@ -416,17 +436,17 @@ public class LostCities : MonoBehaviour
             return (true);
         }
 
-        
+
         return (false);
     }
-    
+
 
     public void RestartGame()
     {
         CURRENT_PLAYER = null;
         SceneManager.LoadScene("__LostCities_Scene_0");
     }
-    
+
 
     // ValidPlay verifies that the card chosen can be played on the discard pile
     public bool ValidPlay(CardLostCities cb)
@@ -458,6 +478,22 @@ public class LostCities : MonoBehaviour
         return (false);
     }
 
+    public int DifferencePlay(CardLostCities cb)
+    {
+        if (WhichAIDiscard(cb).Count == 0)
+        {
+            return cb.rank;
+        }
+        else if (cb.rank > WhichAIDiscard(cb)[WhichAIDiscard(cb).Count - 1].rank)
+        {
+            return cb.rank - WhichAIDiscard(cb)[WhichAIDiscard(cb).Count - 1].rank;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
     // This makes a new card the target
     public CardLostCities MoveToTarget(CardLostCities tCB)
     {
@@ -484,6 +520,50 @@ public class LostCities : MonoBehaviour
         targetKeepCard = tCB;
         Debug.Log(tCB.state);
     }
+    public CardLostCities CurrentCard()
+    {
+        return targetKeepCard;
+    }
+    public void ArrangeDiscard(CardLostCities tCB)
+    {
+        
+        if (tCB.suit.Equals("R"))
+        {
+            tCB.SetSortingLayerName(layout.redDiscardPile.layerName);
+            tCB.SetSortOrder(redDiscardPile.Count * 4);
+            tCB.transform.localPosition = layout.redDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+        }
+        if (tCB.suit.Equals("G"))
+        {
+            tCB.SetSortingLayerName(layout.greenDiscardPile.layerName);
+            tCB.SetSortOrder(greenDiscardPile.Count * 4);
+            tCB.transform.localPosition = layout.greenDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        }
+        if (tCB.suit.Equals("W"))
+        {
+            tCB.SetSortingLayerName(layout.whiteDiscardPile.layerName);
+            tCB.SetSortOrder(whiteDiscardPile.Count * 4);
+            tCB.transform.localPosition = layout.whiteDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        }
+        if (tCB.suit.Equals("B"))
+        {
+            tCB.SetSortingLayerName(layout.blueDiscardPile.layerName);
+            tCB.SetSortOrder(blueDiscardPile.Count * 4);
+            tCB.transform.localPosition = layout.blueDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        }
+        if (tCB.suit.Equals("Y"))
+        {
+            tCB.SetSortingLayerName(layout.yellowDiscardPile.layerName);
+            tCB.SetSortOrder(yellowDiscardPile.Count * 4);
+            tCB.transform.localPosition = layout.yellowDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        }
+    }
 
     public CardLostCities MoveToDiscard(CardLostCities tCB)
     {
@@ -492,23 +572,28 @@ public class LostCities : MonoBehaviour
         tCB.timeStart = 0;
         if (tCB.suit.Equals("R"))
         {
-            
+
             tCB.SetSortingLayerName(layout.redDiscardPile.layerName);
             tCB.SetSortOrder(redDiscardPile.Count * 4);
-            //tCB.transform.localPosition = layout.greenDiscardPile.pos + Vector3.back / 2;
+            //tCB.transform.localPosition = Vector3.back / 2;
             //tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
             pos = layout.redDiscardPile.pos;
             tCB.MoveTo(pos);
 
+
+
             tCB.state = CBState.toRedDiscard;
+
+            
         }
         if (tCB.suit.Equals("G"))
         {
             tCB.SetSortingLayerName(layout.greenDiscardPile.layerName);
             tCB.SetSortOrder(greenDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-            pos = layout.greenDiscardPile.pos;
+            pos = layout.greenDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toGreenDiscard;
@@ -517,8 +602,9 @@ public class LostCities : MonoBehaviour
         {
             tCB.SetSortingLayerName(layout.whiteDiscardPile.layerName);
             tCB.SetSortOrder(whiteDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-            pos = layout.whiteDiscardPile.pos;
+            pos = layout.whiteDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toWhiteDiscard;
@@ -527,8 +613,9 @@ public class LostCities : MonoBehaviour
         {
             tCB.SetSortingLayerName(layout.blueDiscardPile.layerName);
             tCB.SetSortOrder(blueDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-            pos = layout.blueDiscardPile.pos;
+            pos = layout.blueDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toBlueDiscard;
@@ -537,35 +624,116 @@ public class LostCities : MonoBehaviour
         {
             tCB.SetSortingLayerName(layout.yellowDiscardPile.layerName);
             tCB.SetSortOrder(yellowDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-            pos = layout.yellowDiscardPile.pos;
+            pos = layout.yellowDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toYellowDiscard;
         }
 
         players[0].RemoveCard(tCB);
+        lastPlayedCard = tCB;
         return tCB;
     }
+
+    public CardLostCities MoveToDiscardForAI(CardLostCities tCB)
+    {
+        WhichDiscard(tCB).Add(tCB);
+        Vector3 pos;
+        tCB.timeStart = 0;
+        if (tCB.suit.Equals("R"))
+        {
+
+            tCB.SetSortingLayerName(layout.redDiscardPile.layerName);
+            tCB.SetSortOrder(redDiscardPile.Count * 4);
+            //tCB.transform.localPosition = layout.greenDiscardPile.pos + Vector3.back / 2;
+            //tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+            pos = layout.redDiscardPile.pos;
+            tCB.MoveTo(pos);
+
+
+
+            tCB.state = CBState.toRedDiscard;
+        }
+        if (tCB.suit.Equals("G"))
+        {
+            tCB.SetSortingLayerName(layout.greenDiscardPile.layerName);
+            tCB.SetSortOrder(greenDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+            pos = layout.greenDiscardPile.pos + Vector3.back / 2;
+            tCB.MoveTo(pos);
+
+            tCB.state = CBState.toGreenDiscard;
+        }
+        if (tCB.suit.Equals("W"))
+        {
+            tCB.SetSortingLayerName(layout.whiteDiscardPile.layerName);
+            tCB.SetSortOrder(whiteDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+            pos = layout.whiteDiscardPile.pos + Vector3.back / 2;
+            tCB.MoveTo(pos);
+
+            tCB.state = CBState.toWhiteDiscard;
+        }
+        if (tCB.suit.Equals("B"))
+        {
+            tCB.SetSortingLayerName(layout.blueDiscardPile.layerName);
+            tCB.SetSortOrder(blueDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+            pos = layout.blueDiscardPile.pos + Vector3.back / 2;
+            tCB.MoveTo(pos);
+
+            tCB.state = CBState.toBlueDiscard;
+        }
+        if (tCB.suit.Equals("Y"))
+        {
+            tCB.SetSortingLayerName(layout.yellowDiscardPile.layerName);
+            tCB.SetSortOrder(yellowDiscardPile.Count * 4);
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+            pos = layout.yellowDiscardPile.pos + Vector3.back / 2;
+            tCB.MoveTo(pos);
+
+            tCB.state = CBState.toYellowDiscard;
+        }
+
+        players[1].RemoveCard(tCB);
+        return tCB;
+    }
+
 
     public CardLostCities MoveToPlayerDiscard(CardLostCities tCB)
     {
         WhichPlayerDiscard(tCB).Add(tCB);
         Vector3 pos;
         tCB.timeStart = 0;
+        Vector2 dpStagger = layout.redPlayer1.stagger;
         if (tCB.suit.Equals("R"))
         {
             tCB.SetSortingLayerName(layout.redPlayer1.layerName);
             tCB.SetSortOrder(redPlayer1.Count * 4);
-            //tCB.transform.localPosition = layout.redPlayer1.pos + Vector3.back / 2;
-            //tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
             pos = layout.redPlayer1.pos;
+            if (redPlayer1.Count == 1)
+            {
+                pos = layout.redPlayer1.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.redPlayer1.layerID + 0.1f * (redPlayer1.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.redPlayer1.y + (redPlayer1.Count - 1) * dpStagger.y), -layout.redPlayer1.layerID + 0.1f * (redPlayer1.Count));
+            }
+
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toRedPlayer1;
 
-            ArrangePlayerPile();
+
         }
         if (tCB.suit.Equals("G"))
         {
@@ -573,21 +741,41 @@ public class LostCities : MonoBehaviour
             tCB.SetSortOrder(greenPlayer1.Count * 4);
 
             pos = layout.greenPlayer1.pos;
+            if (greenPlayer1.Count == 1)
+            {
+                pos = layout.greenPlayer1.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.greenPlayer1.layerID + 0.1f * (greenPlayer1.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.greenPlayer1.y + (greenPlayer1.Count - 1) * dpStagger.y), -layout.greenPlayer1.layerID + 0.1f * (greenPlayer1.Count));
+            }
+
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toGreenPlayer1;
 
-            ArrangePlayerPile();
+
         }
         if (tCB.suit.Equals("W"))
         {
             tCB.SetSortingLayerName(layout.whitePlayer1.layerName);
             tCB.SetSortOrder(whitePlayer1.Count * 4);
+
             pos = layout.whitePlayer1.pos;
+            if (whitePlayer1.Count == 1)
+            {
+                pos = layout.whitePlayer1.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.whitePlayer1.layerID + 0.1f * (whitePlayer1.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.whitePlayer1.y + (whitePlayer1.Count - 1) * dpStagger.y), -layout.whitePlayer1.layerID + 0.1f * (whitePlayer1.Count));
+            }
+
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toWhitePlayer1;
-            ArrangePlayerPile();
         }
         if (tCB.suit.Equals("B"))
         {
@@ -595,10 +783,19 @@ public class LostCities : MonoBehaviour
             tCB.SetSortOrder(bluePlayer1.Count * 4);
 
             pos = layout.bluePlayer1.pos;
+            if (bluePlayer1.Count == 1)
+            {
+                pos = layout.bluePlayer1.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.bluePlayer1.layerID + 0.1f * (bluePlayer1.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.bluePlayer1.y + (bluePlayer1.Count - 1) * dpStagger.y), -layout.bluePlayer1.layerID + 0.1f * (bluePlayer1.Count));
+            }
+
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toBluePlayer1;
-            ArrangePlayerPile();
         }
         if (tCB.suit.Equals("Y"))
         {
@@ -606,13 +803,22 @@ public class LostCities : MonoBehaviour
             tCB.SetSortOrder(yellowPlayer1.Count * 4);
 
             pos = layout.yellowPlayer1.pos;
+            if (yellowPlayer1.Count == 1)
+            {
+                pos = layout.yellowPlayer1.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.yellowPlayer1.layerID + 0.1f * (yellowPlayer1.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.yellowPlayer1.y + (yellowPlayer1.Count - 1) * dpStagger.y), -layout.yellowPlayer1.layerID + 0.1f * (yellowPlayer1.Count));
+            }
+
             tCB.MoveTo(pos);
 
             tCB.state = CBState.toYellowPlayer1;
-            ArrangePlayerPile();
         }
 
-        
+
 
         players[0].RemoveCard(tCB);
 
@@ -624,58 +830,117 @@ public class LostCities : MonoBehaviour
         WhichAIDiscard(tCB).Add(tCB);
         Vector3 pos;
         tCB.timeStart = 0;
+        Vector2 dpStagger = layout.redPlayer2.stagger;
+
+        Vector3 v = new Vector3(180, 0, 0);
+        Quaternion rotQT = Quaternion.Euler(v);
+
+
+
         if (tCB.suit.Equals("R"))
         {
             tCB.SetSortingLayerName(layout.redPlayer2.layerName);
             tCB.SetSortOrder(redPlayer2.Count * 4);
+
             pos = layout.redPlayer2.pos;
-            tCB.MoveTo(pos);
+            if (redPlayer2.Count == 1)
+            {
+                pos = layout.redPlayer2.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.redPlayer2.layerID + 0.1f * (redPlayer2.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.redPlayer2.y + (redPlayer2.Count - 1) * dpStagger.y), -layout.redPlayer2.layerID + 0.1f * (redPlayer2.Count));
+            }
+
+            tCB.MoveTo(pos, rotQT);
 
             tCB.state = CBState.toRedPlayer2;
-            ArrangePlayer2Pile();
+
+
         }
         if (tCB.suit.Equals("G"))
         {
             tCB.SetSortingLayerName(layout.greenPlayer2.layerName);
             tCB.SetSortOrder(greenPlayer2.Count * 4);
+
             pos = layout.greenPlayer2.pos;
-            tCB.MoveTo(pos);
+            if (greenPlayer2.Count == 1)
+            {
+                pos = layout.greenPlayer2.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.greenPlayer2.layerID + 0.1f * (greenPlayer2.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.greenPlayer2.y + (greenPlayer2.Count - 1) * dpStagger.y), -layout.greenPlayer2.layerID + 0.1f * (greenPlayer2.Count));
+            }
+
+            tCB.MoveTo(pos, rotQT);
 
             tCB.state = CBState.toGreenPlayer2;
-            ArrangePlayer2Pile();
+
+
         }
         if (tCB.suit.Equals("W"))
         {
             tCB.SetSortingLayerName(layout.whitePlayer2.layerName);
             tCB.SetSortOrder(whitePlayer2.Count * 4);
+
             pos = layout.whitePlayer2.pos;
-            tCB.MoveTo(pos);
+            if (whitePlayer2.Count == 1)
+            {
+                pos = layout.whitePlayer2.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.whitePlayer2.layerID + 0.1f * (whitePlayer2.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.whitePlayer2.y + (whitePlayer2.Count - 1) * dpStagger.y), -layout.whitePlayer2.layerID + 0.1f * (whitePlayer2.Count));
+            }
+
+            tCB.MoveTo(pos, rotQT);
 
             tCB.state = CBState.toWhitePlayer2;
-            ArrangePlayer2Pile();
         }
         if (tCB.suit.Equals("B"))
         {
             tCB.SetSortingLayerName(layout.bluePlayer2.layerName);
             tCB.SetSortOrder(bluePlayer2.Count * 4);
-            pos = layout.bluePlayer2.pos;
-            tCB.MoveTo(pos);
 
-            tCB.state = CBState.toBluePlayer2; ;
-            ArrangePlayer2Pile();
+            pos = layout.bluePlayer2.pos;
+            if (bluePlayer2.Count == 1)
+            {
+                pos = layout.bluePlayer2.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.bluePlayer2.layerID + 0.1f * (bluePlayer2.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.bluePlayer2.y + (bluePlayer2.Count - 1) * dpStagger.y), -layout.bluePlayer2.layerID + 0.1f * (bluePlayer2.Count));
+            }
+
+            tCB.MoveTo(pos, rotQT);
+
+            tCB.state = CBState.toBluePlayer2;
         }
         if (tCB.suit.Equals("Y"))
         {
             tCB.SetSortingLayerName(layout.yellowPlayer2.layerName);
             tCB.SetSortOrder(yellowPlayer2.Count * 4);
+
             pos = layout.yellowPlayer2.pos;
-            tCB.MoveTo(pos);
+            if (bluePlayer2.Count == 1)
+            {
+                pos = layout.yellowPlayer2.pos;
+                pos = new Vector3(pos.x, pos.y, -layout.yellowPlayer2.layerID + 0.1f * (yellowPlayer2.Count));
+            }
+            else
+            {
+                pos = new Vector3(pos.x, layout.multiplier.y * (layout.yellowPlayer2.y + (yellowPlayer2.Count - 1) * dpStagger.y), -layout.yellowPlayer2.layerID + 0.1f * (yellowPlayer2.Count));
+            }
+
+            tCB.MoveTo(pos, rotQT);
 
             tCB.state = CBState.toYellowPlayer2;
-            ArrangePlayer2Pile();
         }
-
-        
 
         players[1].RemoveCard(tCB);
 
@@ -711,7 +976,7 @@ public class LostCities : MonoBehaviour
     {
         Debug.Log(tCB.suit);
 
-        
+
         {
             if (tCB.suit.Equals("R"))
             {
@@ -734,8 +999,8 @@ public class LostCities : MonoBehaviour
                 return yellowPlayer1;
             }
         }
-        
-        
+
+
     }
     public List<CardLostCities> WhichAIDiscard(CardLostCities tCB)
     {
@@ -788,10 +1053,10 @@ public class LostCities : MonoBehaviour
                     MoveToPlayerDiscard(targetKeepCard);
                     popUp = false;
                     played = true;
-                    
-                    
+
+
                 }
-                
+
                 //phase = TurnPhase.waiting;
             }
 
@@ -806,7 +1071,7 @@ public class LostCities : MonoBehaviour
         playerTurn = true;
         //if (ValidPlay(players[1].TakeTurn(cd))
         //{
-            //MoveToPlayerDiscard(targetKeepCard);
+        //MoveToPlayerDiscard(targetKeepCard);
         //    MoveToAIDiscard(targetKeepCard);
         //}
     }
@@ -825,11 +1090,11 @@ public class LostCities : MonoBehaviour
         //while (discardPile.Count > 0)
         //{
         //    // Pull a random card from the discard pile
-        //    ndx = Random.Range(0, discardPile.Count);
+        // ndx = Random.Range(0, discardPile.Count);
         //    drawPile.Add(discardPile[ndx]);
         //    discardPile.RemoveAt(ndx);
         //}
-        //ArrangeDrawPile();
+        ArrangeDrawPile();
         // Show the cards moving to the drawPile
         //float t = Time.time;
         //foreach (CardLostCities tCB in drawPile)
@@ -840,17 +1105,17 @@ public class LostCities : MonoBehaviour
         //    tCB.timeStart = t;
         //    t += 0.02f;
         //    tCB.state = CBState.toDrawpile;
-        //    tCB.eventualSortLayer = "0";
+        //  tCB.eventualSortLayer = "0";
         //}
         //}
 
-        
+
         drawPile.RemoveAt(0); // Then remove it from List<> drawPile
         CheckGameOver();
         return (cd); // And return it
 
     }
-    
+
     public CardLostCities RedDraw()
     {
         Debug.Log(redDiscardPile.Count - 1);
@@ -897,8 +1162,10 @@ public class LostCities : MonoBehaviour
     {
         //if (CURRENT_PLAYER.type != PlayerType.human) return;
         //if (phase == TurnPhase.waiting) return;
-
+        //targetKeepCard.glow = false;
         ChangeTarget(tCB);
+
+        //tCB.MakingGlow(true);
 
         switch (tCB.state)
         {
@@ -915,7 +1182,7 @@ public class LostCities : MonoBehaviour
                     ArrangeDrawPile();
                     playerTurn = !playerTurn;
                     played = false;
-                    
+
                 }
                 break;
 
@@ -925,7 +1192,7 @@ public class LostCities : MonoBehaviour
                 {
                     popUp = true;
                 }
-                
+
                 //if (ValidPlay(tCB))
                 //{
                 //    MoveToPlayerDiscard(tCB);
@@ -944,33 +1211,43 @@ public class LostCities : MonoBehaviour
                 break;
 
             case CBState.redDiscard:
-                if (players[0].hand.Count < 8)
+                if (players[0].hand.Count < 8 && tCB != lastPlayedCard)
                 {
                     players[0].AddCard(RedDraw());
+                    playerTurn = !playerTurn;
+                    played = false;
                 }
                 break;
             case CBState.greenDiscard:
-                if (players[0].hand.Count < 8)
+                if (players[0].hand.Count < 8 && tCB != lastPlayedCard)
                 {
                     players[0].AddCard(GreenDraw());
+                    playerTurn = !playerTurn;
+                    played = false;
                 }
                 break;
             case CBState.whiteDiscard:
-                if (players[0].hand.Count < 8)
+                if (players[0].hand.Count < 8 && tCB != lastPlayedCard)
                 {
                     players[0].AddCard(WhiteDraw());
+                    playerTurn = !playerTurn;
+                    played = false;
                 }
                 break;
             case CBState.blueDiscard:
-                if (players[0].hand.Count < 8)
+                if (players[0].hand.Count < 8 && tCB != lastPlayedCard)
                 {
                     players[0].AddCard(BlueDraw());
+                    playerTurn = !playerTurn;
+                    played = false;
                 }
                 break;
             case CBState.yellowDiscard:
-                if (players[0].hand.Count < 8)
+                if (players[0].hand.Count < 8 && tCB != lastPlayedCard)
                 {
                     players[0].AddCard(YellowDraw());
+                    playerTurn = !playerTurn;
+                    played = false;
                 }
                 break;
         }

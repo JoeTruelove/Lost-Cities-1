@@ -43,6 +43,8 @@ public enum CBState
     player2,
     toHand,
     hand,
+    toAIHand,
+    aIHand,
     toTarget,
     target,
     discard,
@@ -58,6 +60,9 @@ public class CardLostCities : Card {
     static public float CARD_WIDTH = 2f;
     public int weight = 0;
     public bool otherCard = false;
+    public bool glow = false;
+
+
 
     [Header("Set Dynamically: LostCities")]
     public CBState state = CBState.drawpile;
@@ -102,8 +107,11 @@ public class CardLostCities : Card {
         MoveTo(ePos, Quaternion.identity);
     }
 
+    
+
     private void Update()
     {
+        CardLostCities tCB = LostCities.S.CurrentCard();
         switch (state)
         {
             case CBState.toHand:
@@ -164,7 +172,15 @@ public class CardLostCities : Card {
 
                     // Reset timeStart to 0 so it gets overwritten next time
                     timeStart = 0;
-
+                    if(state == CBState.redDiscard) LostCities.S.ArrangeDiscard(tCB);
+                    if(state == CBState.greenDiscard) LostCities.S.ArrangeDiscard(tCB);
+                    if(state == CBState.whiteDiscard) LostCities.S.ArrangeDiscard(tCB);
+                    if(state == CBState.blueDiscard) LostCities.S.ArrangeDiscard(tCB);
+                    if(state == CBState.yellowDiscard) LostCities.S.ArrangeDiscard(tCB);
+                    
+                    
+                    LostCities.S.ArrangePlayerPile();
+                    LostCities.S.ArrangePlayer2Pile();
                     
                     //this code not used
                     if (reportFinishTo != null)
@@ -209,9 +225,15 @@ public class CardLostCities : Card {
                     }
                 }
                 break;
+                
         }
     }
 
+
+    public void StopGlow()
+    {
+        glow = false;
+    }
     // This allows the card to react to being clicked
     public override void OnMouseUpAsButton()
     {
@@ -219,6 +241,7 @@ public class CardLostCities : Card {
         LostCities.S.CardClicked(this);
         // Also call the base class (Card.cs) version of this method
         base.OnMouseUpAsButton();
+        
     }
 
     public int getWeight()

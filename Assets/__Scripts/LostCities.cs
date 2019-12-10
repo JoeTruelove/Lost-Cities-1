@@ -61,7 +61,11 @@ public class LostCities : MonoBehaviour
     public bool played = false;
     public bool glow = false;
     public bool winner;
-
+    public bool draw = false;
+    public int p1Score;
+    public int p2Score;
+    
+    
     private BartokLayout layout;
     private Transform layoutAnchor;
     
@@ -655,7 +659,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.redDiscardPile.pos;
             tCB.MoveTo(pos);
-
+            tCB.faceUp = true;
 
 
             tCB.state = CBState.toRedDiscard;
@@ -668,7 +672,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.greenDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            tCB.faceUp = true;
             tCB.state = CBState.toGreenDiscard;
         }
         if (tCB.suit.Equals("W"))
@@ -679,7 +683,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.whiteDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            tCB.faceUp = true;
             tCB.state = CBState.toWhiteDiscard;
         }
         if (tCB.suit.Equals("B"))
@@ -690,7 +694,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.blueDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            tCB.faceUp = true;
             tCB.state = CBState.toBlueDiscard;
         }
         if (tCB.suit.Equals("Y"))
@@ -701,7 +705,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.yellowDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            tCB.faceUp = true;
             tCB.state = CBState.toYellowDiscard;
         }
 
@@ -1252,6 +1256,7 @@ public class LostCities : MonoBehaviour
         int player2WMultiplier = 0;
         int player2BMultiplier = 0;
         int player2YMultiplier = 0;
+
         Debug.Log(redPlayer1);
         if(redPlayer1 == null) player1RMultiplier = Score.S.Multiplier(redPlayer1);
         if(greenPlayer1 == null) player1GMultiplier = Score.S.Multiplier(greenPlayer1);
@@ -1265,8 +1270,13 @@ public class LostCities : MonoBehaviour
         if(bluePlayer2 == null) player2BMultiplier = Score.S.Multiplier(bluePlayer2);
         if(yellowPlayer2 == null) player2YMultiplier = Score.S.Multiplier(yellowPlayer2);
         
-        if(player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(redPlayer1);
-        else player1Score = player1Score + player1RMultiplier * Score.S.ComputeScore(redPlayer1);
+        if(redPlayer1 != null)
+        {
+            int computedScore = Score.S.ComputeScore(redPlayer1);
+            if (player1RMultiplier == 0) player1Score = player1Score + computedScore;
+            else player1Score = player1Score + player1RMultiplier * Score.S.ComputeScore(redPlayer1);
+        }
+        
         if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(greenPlayer1);
         else player1Score = player1Score + player1GMultiplier * Score.S.ComputeScore(greenPlayer1);
         if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(whitePlayer1);
@@ -1287,21 +1297,33 @@ public class LostCities : MonoBehaviour
         if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(yellowPlayer2);
         else player2Score = player2Score + player2YMultiplier * Score.S.ComputeScore(yellowPlayer2);
 
+        p1Score = player1Score;
+        p2Score = player2Score;
 
-
-        if (drawPile.Count == 40)
+        if (drawPile.Count == 0)
         {
             if(player1Score > player2Score)
             {
-                CURRENT_PLAYER.type = PlayerType.human;
+                winner = true;
+               //ScoreManager.S.state = eScoreEvent.gameWin;
             }
             else if(player2Score > player1Score)
             {
-                CURRENT_PLAYER.type = PlayerType.ai;
+                winner = false;
+                //ScoreManager.S.state = eScoreEvent.gameLoss;
             }
+            else if(player1Score == player2Score)
+            {
+                draw = true;
+                //ScoreManager.S.state = eScoreEvent.draw;
+            }
+            //ScoreManager.S.score = player1Score;
+            //ScoreManager.S.Event(ScoreManager.S.state);
+            //GetComponent<Text>().text = player1Score;
             phase = TurnPhase.gameOver;
             Invoke("RestartGame", 1);
 
         }
     }
+
 }

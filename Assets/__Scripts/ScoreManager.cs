@@ -12,16 +12,17 @@ public enum eScoreEvent
 }
 
 public class ScoreManager : MonoBehaviour {
-    static private ScoreManager S;
+    public static ScoreManager S;
 
     static public int SCORE_FROM_PREV_ROUND = 0;
     static public int HIGH_SCORE = 0;
 
     [Header("Set Dynamically")]
     // Fields to track score info
-    public int chain = 0;
+    
     public int scoreRun = 0;
     public int score = 0;
+    public eScoreEvent state = eScoreEvent.mine;
 
     private void Awake()
     {
@@ -58,7 +59,7 @@ public class ScoreManager : MonoBehaviour {
         }
     }
 
-    private void Event(eScoreEvent evt)
+    public void Event(eScoreEvent evt)
     {
         switch (evt)
         {
@@ -66,17 +67,13 @@ public class ScoreManager : MonoBehaviour {
             case eScoreEvent.draw: // Drawing a card
             case eScoreEvent.gameWin: // Won the round
             case eScoreEvent.gameLoss: // Lost the round
-                chain = 0; // resets the score chain
-                score += scoreRun; // add scoreRun to total score
-                scoreRun = 0; // reset scoreRun
+                
                 break;
 
             case eScoreEvent.mine: // Remove a mine card 
-                chain++; // increase the score chain
-                scoreRun += chain; // add score for this card to run
                 break;
         }
-
+        
         // This second switch statement handles round wins and losses
         switch (evt)
         {
@@ -102,12 +99,10 @@ public class ScoreManager : MonoBehaviour {
                 break;
 
             default:
-                print("score: " + score + "  scoreRun:" + scoreRun + "  chain:" + chain);
+                print("score: " + score);
                 break;
         }
     }
 
-    static public int CHAIN {  get { return S.chain; } }
     static public int SCORE {  get { return S.score; } }
-    static public int SCORE_RUN {  get { return S.scoreRun; } }
 }

@@ -719,6 +719,8 @@ GameObject:
   - component: {fileID: 1382180769}
   - component: {fileID: 1382180770}
   - component: {fileID: 1382180771}
+  - component: {fileID: 1382180772}
+  - component: {fileID: 1382180773}
   m_Layer: 0
   m_Name: _MainCamera
   m_TagString: MainCamera
@@ -942,6 +944,10 @@ MonoBehaviour:
   playerTurn: 1
   played: 0
   glow: 0
+  winner: 0
+  draw: 0
+  p1Score: 0
+  p2Score: 0
 --- !u!114 &1382180771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1179,6 +1185,35 @@ MonoBehaviour:
     stagger: {x: 0, y: 0}
     player: 0
     pos: {x: 0, y: 0, z: 0}
+--- !u!114 &1382180772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382180764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a5e4e409f71a8c46ac9a6a2b8dc12e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  computedScore: 0
+  multiplier: 0
+--- !u!114 &1382180773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382180764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a75d99d1deb73e478934096961c933b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scoreRun: 0
+  score: 0
+  state: 1
 --- !u!1 &1555795406
 GameObject:
   m_ObjectHideFlags: 0

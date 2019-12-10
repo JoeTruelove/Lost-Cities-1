@@ -26,11 +26,14 @@ public class Score : MonoBehaviour
     public int ComputeScore(List<CardLostCities> testList)
     {
         computedScore = 0;
-
-        for (int i = 0; i < testList.Count; i++)
+        if(testList != null)
         {
-            computedScore = computedScore + testList[i].rank;
+            for (int i = 0; i < testList.Count; i++)
+            {
+                computedScore = computedScore + testList[i].rank;
+            }
         }
+        
         return computedScore;
 
     }
@@ -41,12 +44,14 @@ public class Score : MonoBehaviour
 
         multiplier = 1;
 
-        int i = 0;
-        while (testList[i].rank == 1)
+        for(int i = 0; i < testList.Count; i++)
         {
-            multiplier = multiplier + 1;
-            i = i + 1;
+            if(testList[i].rank == 1)
+            {
+                multiplier++;
+            }
         }
+        
 
         return multiplier;
     }

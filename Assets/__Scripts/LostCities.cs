@@ -60,9 +60,11 @@ public class LostCities : MonoBehaviour
     public bool playerTurn = true;
     public bool played = false;
     public bool glow = false;
+    public bool winner;
 
     private BartokLayout layout;
     private Transform layoutAnchor;
+    
 
     private void Awake()
     {
@@ -87,11 +89,11 @@ public class LostCities : MonoBehaviour
 
     public void FixFace()
     {
-        for(int i=0; i<players[1].hand.Count; i++)
+        for (int i = 0; i < players[1].hand.Count; i++)
         {
             players[1].hand[i].faceUp = false;
         }
-        
+
     }
 
     private void Update()
@@ -102,6 +104,7 @@ public class LostCities : MonoBehaviour
             players[1].AddCard(Draw());
             FixFace();
         }
+        
     }
 
     List<CardLostCities> UpgradeCardsList(List<Card> lCD)
@@ -362,15 +365,15 @@ public class LostCities : MonoBehaviour
         {
             for (int j = 0; j < 2; j++)
             {
-                
+
                 tCB = Draw(); // Draw a card
-                
+
                 // Stagger the draw time a bit.
                 tCB.timeStart = Time.time + drawTimeStagger * (i * 4 + j);
 
                 players[j].AddCard(tCB);
-                
-                        
+
+
             }
 
 
@@ -526,7 +529,7 @@ public class LostCities : MonoBehaviour
     }
     public void ArrangeDiscard(CardLostCities tCB)
     {
-        
+
         if (tCB.suit.Equals("R"))
         {
             tCB.SetSortingLayerName(layout.redDiscardPile.layerName);
@@ -585,7 +588,7 @@ public class LostCities : MonoBehaviour
 
             tCB.state = CBState.toRedDiscard;
 
-            
+
         }
         if (tCB.suit.Equals("G"))
         {
@@ -1082,36 +1085,17 @@ public class LostCities : MonoBehaviour
 
         CardLostCities cd = drawPile[0]; // Pull the 0th CardLostCities
 
-        //if (drawPile.Count == 0)
-        //{
-        // If the drawPile is now empty
-        // We need to shuffle the discards into the drawPile
-        //int ndx;
-        //while (discardPile.Count > 0)
-        //{
-        //    // Pull a random card from the discard pile
-        // ndx = Random.Range(0, discardPile.Count);
-        //    drawPile.Add(discardPile[ndx]);
-        //    discardPile.RemoveAt(ndx);
-        //}
+        
         ArrangeDrawPile();
-        // Show the cards moving to the drawPile
-        //float t = Time.time;
-        //foreach (CardLostCities tCB in drawPile)
-        //{
-        //    tCB.transform.localPosition = layout.discardPile.pos;
-        //    tCB.callbackPlayer = null;
-        //    tCB.MoveTo(layout.drawPile.pos);
-        //    tCB.timeStart = t;
-        //    t += 0.02f;
-        //    tCB.state = CBState.toDrawpile;
-        //  tCB.eventualSortLayer = "0";
-        //}
-        //}
+        
 
 
         drawPile.RemoveAt(0); // Then remove it from List<> drawPile
         CheckGameOver();
+        if (drawPile.Count == 40)
+        {
+            GameOver();
+        }
         return (cd); // And return it
 
     }
@@ -1268,26 +1252,56 @@ public class LostCities : MonoBehaviour
         int player2WMultiplier = 0;
         int player2BMultiplier = 0;
         int player2YMultiplier = 0;
+        Debug.Log(redPlayer1);
+        if(redPlayer1 == null) player1RMultiplier = Score.S.Multiplier(redPlayer1);
+        if(greenPlayer1 == null) player1GMultiplier = Score.S.Multiplier(greenPlayer1);
+        if(whitePlayer1 == null) player1WMultiplier = Score.S.Multiplier(whitePlayer1);
+        if(bluePlayer1 == null) player1BMultiplier = Score.S.Multiplier(bluePlayer1);
+        if(yellowPlayer1 == null) player1YMultiplier = Score.S.Multiplier(yellowPlayer1);
+        
+        if(redPlayer2 == null) player2RMultiplier = Score.S.Multiplier(redPlayer2);
+        if(greenPlayer2 == null) player2GMultiplier = Score.S.Multiplier(greenPlayer2);
+        if(whitePlayer2 == null) player2WMultiplier = Score.S.Multiplier(whitePlayer2);
+        if(bluePlayer2 == null) player2BMultiplier = Score.S.Multiplier(bluePlayer2);
+        if(yellowPlayer2 == null) player2YMultiplier = Score.S.Multiplier(yellowPlayer2);
+        
+        if(player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(redPlayer1);
+        else player1Score = player1Score + player1RMultiplier * Score.S.ComputeScore(redPlayer1);
+        if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(greenPlayer1);
+        else player1Score = player1Score + player1GMultiplier * Score.S.ComputeScore(greenPlayer1);
+        if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(whitePlayer1);
+        else player1Score = player1Score + player1WMultiplier * Score.S.ComputeScore(whitePlayer1);
+        if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(bluePlayer1);
+        else player1Score = player1Score + player1BMultiplier * Score.S.ComputeScore(bluePlayer1);
+        if(player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(yellowPlayer1);
+        else player1Score = player1Score + player1YMultiplier * Score.S.ComputeScore(yellowPlayer1);
 
-        player1RMultiplier = Score.S.Multiplier(redPlayer1);
-        player1GMultiplier = Score.S.Multiplier(greenPlayer1);
-        player1WMultiplier = Score.S.Multiplier(whitePlayer1);
-        player1BMultiplier = Score.S.Multiplier(bluePlayer1);
-        player1YMultiplier = Score.S.Multiplier(yellowPlayer1);
-        player1Score = player1Score + player1RMultiplier * Score.S.ComputeScore(redPlayer1);
-        player1Score = player1Score + player1GMultiplier * Score.S.ComputeScore(greenPlayer1);
-        player1Score = player1Score + player1WMultiplier * Score.S.ComputeScore(whitePlayer1);
-        player1Score = player1Score + player1BMultiplier * Score.S.ComputeScore(bluePlayer1);
-        player1Score = player1Score + player1YMultiplier * Score.S.ComputeScore(yellowPlayer1);
-        player2RMultiplier = Score.S.Multiplier(redPlayer2);
-        player2GMultiplier = Score.S.Multiplier(greenPlayer2);
-        player2WMultiplier = Score.S.Multiplier(whitePlayer2);
-        player2BMultiplier = Score.S.Multiplier(bluePlayer2);
-        player2YMultiplier = Score.S.Multiplier(yellowPlayer2);
-        player2Score = player2Score + player2RMultiplier * Score.S.ComputeScore(redPlayer2);
-        player2Score = player2Score + player2GMultiplier * Score.S.ComputeScore(greenPlayer2);
-        player2Score = player2Score + player2WMultiplier * Score.S.ComputeScore(whitePlayer2);
-        player2Score = player2Score + player2BMultiplier * Score.S.ComputeScore(bluePlayer2);
-        player2Score = player2Score + player2YMultiplier * Score.S.ComputeScore(yellowPlayer2);
+        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(redPlayer2);
+        else player2Score = player2Score + player2RMultiplier * Score.S.ComputeScore(redPlayer2);
+        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(greenPlayer2);
+        else player2Score = player2Score + player2GMultiplier * Score.S.ComputeScore(greenPlayer2);
+        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(whitePlayer2);
+        else player2Score = player2Score + player2WMultiplier * Score.S.ComputeScore(whitePlayer2);
+        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(bluePlayer2);
+        else player2Score = player2Score + player2BMultiplier * Score.S.ComputeScore(bluePlayer2);
+        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(yellowPlayer2);
+        else player2Score = player2Score + player2YMultiplier * Score.S.ComputeScore(yellowPlayer2);
+
+
+
+        if (drawPile.Count == 40)
+        {
+            if(player1Score > player2Score)
+            {
+                CURRENT_PLAYER.type = PlayerType.human;
+            }
+            else if(player2Score > player1Score)
+            {
+                CURRENT_PLAYER.type = PlayerType.ai;
+            }
+            phase = TurnPhase.gameOver;
+            Invoke("RestartGame", 1);
+
+        }
     }
 }

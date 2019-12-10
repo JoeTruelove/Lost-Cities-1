@@ -29,5 +29,7 @@ public class RoundResultUI : MonoBehaviour {
         {
             txt.text = "Player " + (cP.playerNum) + " won";
         }
+
+        //Player winner = LostCities.winner;
     }
 }

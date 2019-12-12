@@ -10,7 +10,7 @@ public class UIManager : MonoBehaviour{
     public Animator dialog;
 
     public void StartGame(){
-        SceneManager.LoadScene("__Bartok_Scene_0");
+        SceneManager.LoadScene("__LostCities_Scene_0");
     }
 
     public void OpenSettings(){

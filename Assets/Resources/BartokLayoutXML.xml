@@ -32,7 +32,7 @@
   
   <!-- These slots are for the four hands held by the four players -->
   <slot type="hand" x="0" y="-11.5" rot="0" player="1" layer="3"/>
-  <slot type="hand" x="0" y="11.5" rot="180" faceup="0" player="2" layer="3"/>
+  <slot type="hand" x="0" y="11.5" rot="180" player="2" layer="3"/>
 	
 </xml>
 	

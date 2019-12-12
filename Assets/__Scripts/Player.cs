@@ -115,13 +115,13 @@ public class Player
             hand[i].transform.rotation = rotQ;
             hand[i].state = CBState.hand; 
             This ends the multiline comment => */
-
-            hand[i].faceUp = (type == PlayerType.human);
-
-            //else if (type == PlayerType.ai)
-            //{
-            //    hand[i].faceUp = (type == PlayerType.ai);
-            //}
+            Debug.Log(type);
+            if (hand[i].faceUp = (type == PlayerType.human));
+            
+            else if (type == PlayerType.ai)
+            {
+                hand[i].faceUp = (type == PlayerType.ai);
+            }
 
             // Set the SortOrder of the cards so that they overlap properly
             hand[i].eventualSortOrder = i * 4;
@@ -135,7 +135,7 @@ public class Player
         Utils.tr("Player.TakeTurn");
 
         // Don't need to do anything if this is the human player.
-        //if (type == PlayerType.human) return;
+        if (type == PlayerType.human) return;
 
         //LostCities.S.phase = TurnPhase.waiting;
 
@@ -321,6 +321,7 @@ public class Player
             {
                 cb = cardtoPlay[0];
                 LostCities.S.MoveToAIDiscard(cb);
+                
             }
             else if (discardCards.Count > 0)
             {
@@ -338,7 +339,7 @@ public class Player
         //RemoveCard(cb);
         //LostCities.S.MoveToTarget(cb);
         //cb.callbackPlayer = this;
-
+        
         foreach (CardLostCities tCB in hand)
         {
             tCB.setWeight(0);

@@ -57,6 +57,7 @@ public class LostCities : MonoBehaviour
     public int firstCard = 0;
 
     public bool popUp = false;
+    public bool popUpGameOver = false;
     public bool playerTurn = true;
     public bool played = false;
     public bool glow = false;
@@ -64,11 +65,11 @@ public class LostCities : MonoBehaviour
     public bool draw = false;
     public int p1Score;
     public int p2Score;
-    
-    
+    public int finished = 0;
+
     private BartokLayout layout;
     private Transform layoutAnchor;
-    
+
 
     private void Awake()
     {
@@ -97,18 +98,34 @@ public class LostCities : MonoBehaviour
         {
             players[1].hand[i].faceUp = false;
         }
-
+        for (int i = 0; i < players[0].hand.Count; i++)
+        {
+            players[0].hand[i].state = CBState.toHand;
+        }
     }
 
     private void Update()
     {
-        if (!playerTurn)
+        if (!playerTurn && finished == 1)
         {
-            playAI();
-            players[1].AddCard(Draw());
             FixFace();
+            AITurn();
+            
         }
-        
+
+        FixFace();
+
+
+    }
+
+    public void AITurn()
+    {
+        finished = 0;
+        Invoke("playAI", 2);
+        //playAI();
+        Invoke("aIDoDraw", 3);
+
+
     }
 
     List<CardLostCities> UpgradeCardsList(List<Card> lCD)
@@ -162,7 +179,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.redPlayer1.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            tCB.state = CBState.player1;
+            tCB.state = CBState.toRedPlayer1;
         }
         for (int i = 0; i < greenPlayer1.Count; i++)
         {
@@ -178,7 +195,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.greenPlayer1.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            tCB.state = CBState.player1;
+            tCB.state = CBState.toGreenPlayer1;
         }
         for (int i = 0; i < whitePlayer1.Count; i++)
         {
@@ -194,7 +211,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.whitePlayer1.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            tCB.state = CBState.player1;
+            tCB.state = CBState.toWhitePlayer1;
         }
         for (int i = 0; i < bluePlayer1.Count; i++)
         {
@@ -210,7 +227,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.bluePlayer1.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            tCB.state = CBState.player1;
+            tCB.state = CBState.toBluePlayer1;
         }
         for (int i = 0; i < yellowPlayer1.Count; i++)
         {
@@ -226,7 +243,7 @@ public class LostCities : MonoBehaviour
             tCB.faceUp = true;
             tCB.SetSortingLayerName(layout.yellowPlayer1.layerName);
             tCB.SetSortOrder(i * 4); // Order them front-to-back
-            tCB.state = CBState.player1;
+            tCB.state = CBState.toYellowPlayer1;
         }
     }
 
@@ -238,7 +255,7 @@ public class LostCities : MonoBehaviour
 
             tCB = redPlayer2[i];
             tCB.transform.SetParent(layoutAnchor);
-            tCB.transform.localPosition = layout.redPlayer2.pos;
+            //tCB.transform.localPosition = layout.redPlayer2.pos;
 
             Vector2 dpStagger = layout.redPlayer2.stagger;
             tCB.transform.localPosition = new Vector3(
@@ -252,13 +269,13 @@ public class LostCities : MonoBehaviour
             {
                 tCB.transform.Rotate(180, 0, 0);
             }
-            tCB.state = CBState.player2;
+            tCB.state = CBState.toRedPlayer2;
         }
         for (int i = 0; i < greenPlayer2.Count; i++)
         {
             tCB = greenPlayer2[i];
             tCB.transform.SetParent(layoutAnchor);
-            tCB.transform.localPosition = layout.greenPlayer2.pos;
+            //tCB.transform.localPosition = layout.greenPlayer2.pos;
 
             Vector2 dpStagger = layout.greenPlayer2.stagger;
             tCB.transform.localPosition = new Vector3(
@@ -272,13 +289,13 @@ public class LostCities : MonoBehaviour
             {
                 tCB.transform.Rotate(180, 0, 0);
             }
-            tCB.state = CBState.player2;
+            tCB.state = CBState.toGreenPlayer2;
         }
         for (int i = 0; i < whitePlayer2.Count; i++)
         {
             tCB = whitePlayer2[i];
             tCB.transform.SetParent(layoutAnchor);
-            tCB.transform.localPosition = layout.whitePlayer2.pos;
+            //tCB.transform.localPosition = layout.whitePlayer2.pos;
 
             Vector2 dpStagger = layout.whitePlayer2.stagger;
             tCB.transform.localPosition = new Vector3(
@@ -292,13 +309,13 @@ public class LostCities : MonoBehaviour
             {
                 tCB.transform.Rotate(180, 0, 0);
             }
-            tCB.state = CBState.player2;
+            tCB.state = CBState.toWhitePlayer2;
         }
         for (int i = 0; i < bluePlayer2.Count; i++)
         {
             tCB = bluePlayer2[i];
             tCB.transform.SetParent(layoutAnchor);
-            tCB.transform.localPosition = layout.bluePlayer2.pos;
+            //tCB.transform.localPosition = layout.bluePlayer2.pos;
 
             Vector2 dpStagger = layout.bluePlayer2.stagger;
             tCB.transform.localPosition = new Vector3(
@@ -312,13 +329,13 @@ public class LostCities : MonoBehaviour
             {
                 tCB.transform.Rotate(180, 0, 0);
             }
-            tCB.state = CBState.player2;
+            tCB.state = CBState.toBluePlayer2;
         }
         for (int i = 0; i < yellowPlayer2.Count; i++)
         {
             tCB = yellowPlayer2[i];
             tCB.transform.SetParent(layoutAnchor);
-            tCB.transform.localPosition = layout.yellowPlayer2.pos;
+            //tCB.transform.localPosition = layout.yellowPlayer2.pos;
 
             Vector2 dpStagger = layout.yellowPlayer2.stagger;
             tCB.transform.localPosition = new Vector3(
@@ -332,7 +349,93 @@ public class LostCities : MonoBehaviour
             {
                 tCB.transform.Rotate(180, 0, 0);
             }
-            tCB.state = CBState.target;
+            tCB.state = CBState.toYellowPlayer2;
+        }
+    }
+
+    public void ArrangeDiscardPiles()
+    {
+        CardLostCities tCB;
+        for (int i = 0; i < redDiscardPile.Count; i++)
+        {
+
+            tCB = redDiscardPile[i];
+            tCB.transform.SetParent(layoutAnchor);
+            //tCB.transform.localPosition = layout.redPlayer2.pos;
+
+            Vector2 dpStagger = layout.redDiscardPile.stagger;
+            tCB.transform.localPosition = new Vector3(
+                layout.multiplier.x * (layout.redDiscardPile.x + i * dpStagger.x),
+                layout.multiplier.y * (layout.redDiscardPile.y + i * dpStagger.y),
+                -layout.redDiscardPile.layerID + 0.1f * i);
+            tCB.faceUp = true;
+            tCB.SetSortingLayerName(layout.redDiscardPile.layerName);
+            tCB.SetSortOrder(i * 4); // Order them front-to-back
+            tCB.state = CBState.toRedDiscard;
+        }
+        for (int i = 0; i < greenDiscardPile.Count; i++)
+        {
+            tCB = greenDiscardPile[i];
+            tCB.transform.SetParent(layoutAnchor);
+            //tCB.transform.localPosition = layout.greenPlayer2.pos;
+
+            Vector2 dpStagger = layout.greenDiscardPile.stagger;
+            tCB.transform.localPosition = new Vector3(
+                layout.multiplier.x * (layout.greenDiscardPile.x + i * dpStagger.x),
+                layout.multiplier.y * (layout.greenDiscardPile.y + i * dpStagger.y),
+                -layout.greenDiscardPile.layerID + 0.1f * i);
+            tCB.faceUp = true;
+            tCB.SetSortingLayerName(layout.greenDiscardPile.layerName);
+            tCB.SetSortOrder(i * 4); // Order them front-to-back
+            tCB.state = CBState.toGreenDiscard;
+        }
+        for (int i = 0; i < whiteDiscardPile.Count; i++)
+        {
+            tCB = whiteDiscardPile[i];
+            tCB.transform.SetParent(layoutAnchor);
+            //tCB.transform.localPosition = layout.whitePlayer2.pos;
+
+            Vector2 dpStagger = layout.whiteDiscardPile.stagger;
+            tCB.transform.localPosition = new Vector3(
+                layout.multiplier.x * (layout.whiteDiscardPile.x + i * dpStagger.x),
+                layout.multiplier.y * (layout.whiteDiscardPile.y + i * dpStagger.y),
+                -layout.whiteDiscardPile.layerID + 0.1f * i);
+            tCB.faceUp = true;
+            tCB.SetSortingLayerName(layout.whiteDiscardPile.layerName);
+            tCB.SetSortOrder(i * 4); // Order them front-to-back
+            tCB.state = CBState.toWhiteDiscard;
+        }
+        for (int i = 0; i < blueDiscardPile.Count; i++)
+        {
+            tCB = blueDiscardPile[i];
+            tCB.transform.SetParent(layoutAnchor);
+            //tCB.transform.localPosition = layout.bluePlayer2.pos;
+
+            Vector2 dpStagger = layout.blueDiscardPile.stagger;
+            tCB.transform.localPosition = new Vector3(
+                layout.multiplier.x * (layout.blueDiscardPile.x + i * dpStagger.x),
+                layout.multiplier.y * (layout.blueDiscardPile.y + i * dpStagger.y),
+                -layout.blueDiscardPile.layerID + 0.1f * i);
+            tCB.faceUp = true;
+            tCB.SetSortingLayerName(layout.blueDiscardPile.layerName);
+            tCB.SetSortOrder(i * 4); // Order them front-to-back
+            tCB.state = CBState.toBlueDiscard;
+        }
+        for (int i = 0; i < yellowDiscardPile.Count; i++)
+        {
+            tCB = yellowDiscardPile[i];
+            tCB.transform.SetParent(layoutAnchor);
+            //tCB.transform.localPosition = layout.yellowPlayer2.pos;
+
+            Vector2 dpStagger = layout.yellowDiscardPile.stagger;
+            tCB.transform.localPosition = new Vector3(
+                layout.multiplier.x * (layout.yellowDiscardPile.x + i * dpStagger.x),
+                layout.multiplier.y * (layout.yellowDiscardPile.y + i * dpStagger.y),
+                -layout.yellowDiscardPile.layerID + 0.1f * i);
+            tCB.faceUp = true;
+            tCB.SetSortingLayerName(layout.yellowDiscardPile.layerName);
+            tCB.SetSortOrder(i * 4); // Order them front-to-back
+            tCB.state = CBState.toYellowDiscard;
         }
     }
 
@@ -362,7 +465,8 @@ public class LostCities : MonoBehaviour
 
         }
         players[0].type = PlayerType.human; // Make only the 0th player human
-        Debug.Log(players[1].type);
+        players[1].type = PlayerType.ai; // Make only the 0th player human
+        
         CardLostCities tCB;
         // Deal # cards to each player
         for (int i = 0; i < numStartingCards; i++)
@@ -459,12 +563,6 @@ public class LostCities : MonoBehaviour
     public bool ValidPlay(CardLostCities cb)
     {
 
-        // It's a valid play if the suit is the same
-        // Check is its a higher rank
-        //if (cb.suit == targetCard.suit)
-        //{
-        //    if (cb.rank > targetCard.rank) return (true);
-        //}
         if (playerTurn == true)
         {
             if (WhichPlayerDiscard(cb).Count == 0)
@@ -570,6 +668,7 @@ public class LostCities : MonoBehaviour
             tCB.transform.localPosition = layout.yellowDiscardPile.pos + Vector3.back / 2;
             tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
         }
+
     }
 
     public CardLostCities MoveToDiscard(CardLostCities tCB)
@@ -585,10 +684,11 @@ public class LostCities : MonoBehaviour
             //tCB.transform.localPosition = Vector3.back / 2;
             //tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-            pos = layout.redDiscardPile.pos;
+            pos = layout.redDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
             tCB.MoveTo(pos);
 
-
+            Invoke("ArrangeDiscardPiles", 2);
 
             tCB.state = CBState.toRedDiscard;
 
@@ -602,7 +702,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.greenDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toGreenDiscard;
         }
         if (tCB.suit.Equals("W"))
@@ -613,7 +713,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.whiteDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toWhiteDiscard;
         }
         if (tCB.suit.Equals("B"))
@@ -624,7 +724,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.blueDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toBlueDiscard;
         }
         if (tCB.suit.Equals("Y"))
@@ -635,7 +735,7 @@ public class LostCities : MonoBehaviour
 
             pos = layout.yellowDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
-
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toYellowDiscard;
         }
 
@@ -657,11 +757,12 @@ public class LostCities : MonoBehaviour
             //tCB.transform.localPosition = layout.greenDiscardPile.pos + Vector3.back / 2;
             //tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-            pos = layout.redDiscardPile.pos;
+            pos = layout.redDiscardPile.pos + Vector3.back / 2;
+            tCB.transform.localRotation = Quaternion.Euler(Vector3.zero);
             tCB.MoveTo(pos);
             tCB.faceUp = true;
 
-
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toRedDiscard;
         }
         if (tCB.suit.Equals("G"))
@@ -673,6 +774,7 @@ public class LostCities : MonoBehaviour
             pos = layout.greenDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
             tCB.faceUp = true;
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toGreenDiscard;
         }
         if (tCB.suit.Equals("W"))
@@ -684,6 +786,7 @@ public class LostCities : MonoBehaviour
             pos = layout.whiteDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
             tCB.faceUp = true;
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toWhiteDiscard;
         }
         if (tCB.suit.Equals("B"))
@@ -695,6 +798,7 @@ public class LostCities : MonoBehaviour
             pos = layout.blueDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
             tCB.faceUp = true;
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toBlueDiscard;
         }
         if (tCB.suit.Equals("Y"))
@@ -706,6 +810,7 @@ public class LostCities : MonoBehaviour
             pos = layout.yellowDiscardPile.pos + Vector3.back / 2;
             tCB.MoveTo(pos);
             tCB.faceUp = true;
+            Invoke("ArrangeDiscardPiles", 2);
             tCB.state = CBState.toYellowDiscard;
         }
 
@@ -735,10 +840,10 @@ public class LostCities : MonoBehaviour
             {
                 pos = new Vector3(pos.x, layout.multiplier.y * (layout.redPlayer1.y + (redPlayer1.Count - 1) * dpStagger.y), -layout.redPlayer1.layerID + 0.1f * (redPlayer1.Count));
             }
-
+            tCB.state = CBState.toRedPlayer1;
             tCB.MoveTo(pos);
 
-            tCB.state = CBState.toRedPlayer1;
+
 
 
         }
@@ -757,10 +862,9 @@ public class LostCities : MonoBehaviour
             {
                 pos = new Vector3(pos.x, layout.multiplier.y * (layout.greenPlayer1.y + (greenPlayer1.Count - 1) * dpStagger.y), -layout.greenPlayer1.layerID + 0.1f * (greenPlayer1.Count));
             }
-
+            tCB.state = CBState.toGreenPlayer1;
             tCB.MoveTo(pos);
 
-            tCB.state = CBState.toGreenPlayer1;
 
 
         }
@@ -779,10 +883,10 @@ public class LostCities : MonoBehaviour
             {
                 pos = new Vector3(pos.x, layout.multiplier.y * (layout.whitePlayer1.y + (whitePlayer1.Count - 1) * dpStagger.y), -layout.whitePlayer1.layerID + 0.1f * (whitePlayer1.Count));
             }
-
+            tCB.state = CBState.toWhitePlayer1;
             tCB.MoveTo(pos);
 
-            tCB.state = CBState.toWhitePlayer1;
+
         }
         if (tCB.suit.Equals("B"))
         {
@@ -819,16 +923,15 @@ public class LostCities : MonoBehaviour
             {
                 pos = new Vector3(pos.x, layout.multiplier.y * (layout.yellowPlayer1.y + (yellowPlayer1.Count - 1) * dpStagger.y), -layout.yellowPlayer1.layerID + 0.1f * (yellowPlayer1.Count));
             }
-
+            tCB.state = CBState.toYellowPlayer1;
             tCB.MoveTo(pos);
 
-            tCB.state = CBState.toYellowPlayer1;
         }
 
 
 
         players[0].RemoveCard(tCB);
-
+        Invoke("ArrangePlayerPile", 2);
         return tCB;
     }
 
@@ -948,8 +1051,9 @@ public class LostCities : MonoBehaviour
 
             tCB.state = CBState.toYellowPlayer2;
         }
-
+        tCB.faceUp = true;
         players[1].RemoveCard(tCB);
+        Invoke("ArrangePlayer2Pile", 2);
 
         return tCB;
     }
@@ -1035,7 +1139,7 @@ public class LostCities : MonoBehaviour
     void OnGUI()
     {
 
-        if (popUp && !played && playerTurn)
+        if (popUp && !played && playerTurn && !popUpGameOver)
         {
             if (GUI.Button(new Rect(10, 200, 100, 28), "Discard"))
             {
@@ -1045,7 +1149,7 @@ public class LostCities : MonoBehaviour
                     MoveToDiscard(targetKeepCard);
                     played = true;
                     popUp = false;
-                    //passturn();
+
 
 
                 }
@@ -1056,7 +1160,7 @@ public class LostCities : MonoBehaviour
 
                 if (ValidPlay(targetKeepCard) && playerTurn && !played && targetKeepCard.state == CBState.hand)
                 {
-                    //MoveToPlayerDiscard(targetKeepCard);
+
                     MoveToPlayerDiscard(targetKeepCard);
                     popUp = false;
                     played = true;
@@ -1064,9 +1168,21 @@ public class LostCities : MonoBehaviour
 
                 }
 
-                //phase = TurnPhase.waiting;
+
             }
 
+
+        }
+
+        if (popUpGameOver)
+        {
+            if (GUI.Button(new Rect(475, 750, 200, 48), "Play Again?"))
+            {
+
+                RestartGame();
+
+
+            }
         }
 
     }
@@ -1076,11 +1192,7 @@ public class LostCities : MonoBehaviour
         Utils.tr("AI Turn");
         players[1].TakeTurn();
         playerTurn = true;
-        //if (ValidPlay(players[1].TakeTurn(cd))
-        //{
-        //MoveToPlayerDiscard(targetKeepCard);
-        //    MoveToAIDiscard(targetKeepCard);
-        //}
+
     }
 
     // The Draw function will pull a single card from the drawPile and return it
@@ -1089,19 +1201,26 @@ public class LostCities : MonoBehaviour
 
         CardLostCities cd = drawPile[0]; // Pull the 0th CardLostCities
 
-        
-        ArrangeDrawPile();
-        
+
+
 
 
         drawPile.RemoveAt(0); // Then remove it from List<> drawPile
+        ArrangeDrawPile();
         CheckGameOver();
-        if (drawPile.Count == 40)
+        if (drawPile.Count == 0)
         {
-            GameOver();
+            Invoke("GameOver", 3);
         }
+        cd.state = CBState.toHand;
         return (cd); // And return it
 
+    }
+
+
+    public void aIDoDraw()
+    {
+        players[1].AddCard(Draw());
     }
 
     public CardLostCities RedDraw()
@@ -1148,21 +1267,14 @@ public class LostCities : MonoBehaviour
 
     public void CardClicked(CardLostCities tCB)
     {
-        //if (CURRENT_PLAYER.type != PlayerType.human) return;
-        //if (phase == TurnPhase.waiting) return;
-        //targetKeepCard.glow = false;
+
         ChangeTarget(tCB);
 
-        //tCB.MakingGlow(true);
 
         switch (tCB.state)
         {
             case CBState.drawpile:
-                // Draw the top card, not necessarily the one clicked.
-                //CardLostCities cb = CURRENT_PLAYER.AddCard(Draw());
-                //cb.callbackPlayer = CURRENT_PLAYER;
-                //Utils.tr("LostCities:CardClicked()", "Draw", cb.name);
-                //phase = TurnPhase.waiting;
+
 
                 if (players[0].hand.Count < 8)
                 {
@@ -1170,7 +1282,7 @@ public class LostCities : MonoBehaviour
                     ArrangeDrawPile();
                     playerTurn = !playerTurn;
                     played = false;
-
+                    finished = 1;
                 }
                 break;
 
@@ -1181,21 +1293,6 @@ public class LostCities : MonoBehaviour
                     popUp = true;
                 }
 
-                //if (ValidPlay(tCB))
-                //{
-                //    MoveToPlayerDiscard(tCB);
-                //    CURRENT_PLAYER.RemoveCard(tCB);
-                //    MoveToTarget(tCB);
-                //    tCB.callbackPlayer = CURRENT_PLAYER;
-                //    Utils.tr("LostCities:CardClicked()", "Play", tCB.name, targetCard.name + " is target");
-                //    phase = TurnPhase.waiting;
-                //}
-
-                {
-                    // Just ignore it but report what the player tried
-                    //    Utils.tr("LostCities:CardClicked()", "Attempted to Play", tCB.name, targetCard.name + " is target");
-
-                }
                 break;
 
             case CBState.redDiscard:
@@ -1204,6 +1301,7 @@ public class LostCities : MonoBehaviour
                     players[0].AddCard(RedDraw());
                     playerTurn = !playerTurn;
                     played = false;
+                    finished = 1;
                 }
                 break;
             case CBState.greenDiscard:
@@ -1212,6 +1310,7 @@ public class LostCities : MonoBehaviour
                     players[0].AddCard(GreenDraw());
                     playerTurn = !playerTurn;
                     played = false;
+                    finished = 1;
                 }
                 break;
             case CBState.whiteDiscard:
@@ -1220,6 +1319,7 @@ public class LostCities : MonoBehaviour
                     players[0].AddCard(WhiteDraw());
                     playerTurn = !playerTurn;
                     played = false;
+                    finished = 1;
                 }
                 break;
             case CBState.blueDiscard:
@@ -1228,6 +1328,7 @@ public class LostCities : MonoBehaviour
                     players[0].AddCard(BlueDraw());
                     playerTurn = !playerTurn;
                     played = false;
+                    finished = 1;
                 }
                 break;
             case CBState.yellowDiscard:
@@ -1236,6 +1337,7 @@ public class LostCities : MonoBehaviour
                     players[0].AddCard(YellowDraw());
                     playerTurn = !playerTurn;
                     played = false;
+                    finished = 1;
                 }
                 break;
         }
@@ -1246,73 +1348,126 @@ public class LostCities : MonoBehaviour
     {
         int player1Score = 0;
         int player2Score = 0;
-        int player1RMultiplier = 0;
-        int player1GMultiplier = 0;
-        int player1WMultiplier = 0;
-        int player1BMultiplier = 0;
-        int player1YMultiplier = 0;
-        int player2RMultiplier = 0;
-        int player2GMultiplier = 0;
-        int player2WMultiplier = 0;
-        int player2BMultiplier = 0;
-        int player2YMultiplier = 0;
+        int player1RMultiplier = 1;
+        int player1GMultiplier = 1;
+        int player1WMultiplier = 1;
+        int player1BMultiplier = 1;
+        int player1YMultiplier = 1;
+        int player2RMultiplier = 1;
+        int player2GMultiplier = 1;
+        int player2WMultiplier = 1;
+        int player2BMultiplier = 1;
+        int player2YMultiplier = 1;
+        int p1R = 20;
+        int p1G = 20;
+        int p1W = 20;
+        int p1B = 20;
+        int p1Y = 20;
+        int p2R = 20;
+        int p2G = 20;
+        int p2W = 20;
+        int p2B = 20; 
+        int p2Y = 20;
 
-        Debug.Log(redPlayer1);
-        if(redPlayer1 == null) player1RMultiplier = Score.S.Multiplier(redPlayer1);
-        if(greenPlayer1 == null) player1GMultiplier = Score.S.Multiplier(greenPlayer1);
-        if(whitePlayer1 == null) player1WMultiplier = Score.S.Multiplier(whitePlayer1);
-        if(bluePlayer1 == null) player1BMultiplier = Score.S.Multiplier(bluePlayer1);
-        if(yellowPlayer1 == null) player1YMultiplier = Score.S.Multiplier(yellowPlayer1);
-        
-        if(redPlayer2 == null) player2RMultiplier = Score.S.Multiplier(redPlayer2);
-        if(greenPlayer2 == null) player2GMultiplier = Score.S.Multiplier(greenPlayer2);
-        if(whitePlayer2 == null) player2WMultiplier = Score.S.Multiplier(whitePlayer2);
-        if(bluePlayer2 == null) player2BMultiplier = Score.S.Multiplier(bluePlayer2);
-        if(yellowPlayer2 == null) player2YMultiplier = Score.S.Multiplier(yellowPlayer2);
-        
-        if(redPlayer1 != null)
+
+        if (redPlayer1.Count != 0)
         {
-            int computedScore = Score.S.ComputeScore(redPlayer1);
-            if (player1RMultiplier == 0) player1Score = player1Score + computedScore;
-            else player1Score = player1Score + player1RMultiplier * Score.S.ComputeScore(redPlayer1);
+            player1RMultiplier = Score.S.Multiplier(redPlayer1);
+            if (player1RMultiplier == 1) player1Score = player1Score + Score.S.ComputeScore(redPlayer1);
+            else player1Score = player1Score + (player1RMultiplier * Score.S.ComputeScore(redPlayer1));
+            p1R = p1R * player1RMultiplier;
+            player1Score = player1Score - p1R;
         }
-        
-        if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(greenPlayer1);
-        else player1Score = player1Score + player1GMultiplier * Score.S.ComputeScore(greenPlayer1);
-        if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(whitePlayer1);
-        else player1Score = player1Score + player1WMultiplier * Score.S.ComputeScore(whitePlayer1);
-        if (player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(bluePlayer1);
-        else player1Score = player1Score + player1BMultiplier * Score.S.ComputeScore(bluePlayer1);
-        if(player1RMultiplier == 0) player1Score = player1Score + Score.S.ComputeScore(yellowPlayer1);
-        else player1Score = player1Score + player1YMultiplier * Score.S.ComputeScore(yellowPlayer1);
+        if (greenPlayer1.Count != 0)
+        {
+            player1GMultiplier = Score.S.Multiplier(greenPlayer1);
+            if (player1GMultiplier == 1) player1Score = player1Score + Score.S.ComputeScore(greenPlayer1);
+            else player1Score = player1Score + (player1GMultiplier * Score.S.ComputeScore(greenPlayer1));
+            p1G = p1G * player1GMultiplier;
+            player1Score = player1Score - p1G;
+        }
+        if (whitePlayer1.Count != 0)
+        {
+            player1WMultiplier = Score.S.Multiplier(whitePlayer1);
+            if (player1WMultiplier == 1) player1Score = player1Score + Score.S.ComputeScore(whitePlayer1);
+            else player1Score = player1Score + (player1WMultiplier * Score.S.ComputeScore(whitePlayer1));
+            p1W = p1W * player1WMultiplier;
+            player1Score = player1Score - p1W;
+        }
+        if (bluePlayer1.Count != 0)
+        {
+            player1BMultiplier = Score.S.Multiplier(bluePlayer1);
+            if (player1BMultiplier == 1) player1Score = player1Score + Score.S.ComputeScore(bluePlayer1);
+            else player1Score = player1Score + (player1BMultiplier * Score.S.ComputeScore(bluePlayer1));
+            p1B = p1B * player1BMultiplier;
+            player1Score = player1Score - p1B;
+        }
+        if (yellowPlayer1.Count != 0)
+        {
+            player1YMultiplier = Score.S.Multiplier(yellowPlayer1);
+            if (player1YMultiplier == 1) player1Score = player1Score + Score.S.ComputeScore(yellowPlayer1);
+            else player1Score = player1Score + (player1YMultiplier * Score.S.ComputeScore(yellowPlayer1));
+            p1Y = p1Y * player1YMultiplier;
+            player1Score = player1Score - p1Y;
+        }
 
-        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(redPlayer2);
-        else player2Score = player2Score + player2RMultiplier * Score.S.ComputeScore(redPlayer2);
-        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(greenPlayer2);
-        else player2Score = player2Score + player2GMultiplier * Score.S.ComputeScore(greenPlayer2);
-        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(whitePlayer2);
-        else player2Score = player2Score + player2WMultiplier * Score.S.ComputeScore(whitePlayer2);
-        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(bluePlayer2);
-        else player2Score = player2Score + player2BMultiplier * Score.S.ComputeScore(bluePlayer2);
-        if (player2RMultiplier == 0) player2Score = player2Score + Score.S.ComputeScore(yellowPlayer2);
-        else player2Score = player2Score + player2YMultiplier * Score.S.ComputeScore(yellowPlayer2);
+        if (redPlayer2.Count != 0)
+        {
+            player2RMultiplier = Score.S.Multiplier(redPlayer2);
+            if (player2RMultiplier == 1) player2Score = player2Score + Score.S.ComputeScore(redPlayer2);
+            else player2Score = player2Score + (player2RMultiplier * Score.S.ComputeScore(redPlayer2));
+            p2R = p2R * player2RMultiplier;
+            player2Score = player2Score - p2R;
+        }
+        if (greenPlayer2.Count != 0)
+        {
+            player2GMultiplier = Score.S.Multiplier(greenPlayer2);
+            if (player2GMultiplier == 1) player2Score = player2Score + Score.S.ComputeScore(greenPlayer2);
+            else player2Score = player2Score + (player2GMultiplier * Score.S.ComputeScore(greenPlayer2));
+            p2G = p2G * player2GMultiplier;
+            player2Score = player2Score - p2G;
+        }
+        if (whitePlayer2.Count != 0)
+        {
+            player2WMultiplier = Score.S.Multiplier(whitePlayer2);
+            if (player2WMultiplier == 1) player2Score = player2Score + Score.S.ComputeScore(whitePlayer2);
+            else player2Score = player2Score + (player2WMultiplier * Score.S.ComputeScore(whitePlayer2));
+            p2W = p2W * player2WMultiplier;
+            player2Score = player2Score - p2W;
+        }
+        if (bluePlayer2.Count != 0)
+        {
+            player2BMultiplier = Score.S.Multiplier(bluePlayer2);
+            if (player2BMultiplier == 1) player2Score = player2Score + Score.S.ComputeScore(bluePlayer2);
+            else player2Score = player2Score + (player2BMultiplier * Score.S.ComputeScore(bluePlayer2));
+            p2B = p2B * player2BMultiplier;
+            player2Score = player2Score - p2B;
+        }
+        if (yellowPlayer2.Count != 0)
+        {
+            player2YMultiplier = Score.S.Multiplier(yellowPlayer2);
+            if (player2YMultiplier == 1) player2Score = player2Score + Score.S.ComputeScore(yellowPlayer2);
+            else player2Score = player2Score + (player2YMultiplier * Score.S.ComputeScore(yellowPlayer2));
+            p2Y = p2Y * player2YMultiplier;
+            player2Score = player2Score - p2Y;
+        }
 
         p1Score = player1Score;
         p2Score = player2Score;
 
-        if (drawPile.Count == 0)
+        if (drawPile.Count == 40)
         {
-            if(player1Score > player2Score)
+            if (player1Score > player2Score)
             {
                 winner = true;
-               //ScoreManager.S.state = eScoreEvent.gameWin;
+                //ScoreManager.S.state = eScoreEvent.gameWin;
             }
-            else if(player2Score > player1Score)
+            else if (player2Score > player1Score)
             {
                 winner = false;
                 //ScoreManager.S.state = eScoreEvent.gameLoss;
             }
-            else if(player1Score == player2Score)
+            else if (player1Score == player2Score)
             {
                 draw = true;
                 //ScoreManager.S.state = eScoreEvent.draw;
@@ -1321,7 +1476,8 @@ public class LostCities : MonoBehaviour
             //ScoreManager.S.Event(ScoreManager.S.state);
             //GetComponent<Text>().text = player1Score;
             phase = TurnPhase.gameOver;
-            Invoke("RestartGame", 1);
+            //Invoke("RestartGame", 10);
+            popUpGameOver = true;
 
         }
     }

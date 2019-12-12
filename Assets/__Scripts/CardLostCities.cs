@@ -54,7 +54,7 @@ public enum CBState
 
 public class CardLostCities : Card {
     //Static variables are shared by all instances of CardBartok
-    static public float MOVE_DURATION = 0.5f;
+    static public float MOVE_DURATION = 0.75f;
     static public string MOVE_EASING = Easing.InOut;
     static public float CARD_HEIGHT = 3.5f;
     static public float CARD_WIDTH = 2f;
@@ -171,17 +171,20 @@ public class CardLostCities : Card {
                     transform.rotation = bezierRots[bezierPts.Count - 1];
 
                     // Reset timeStart to 0 so it gets overwritten next time
-                    timeStart = 0;
+                    
                     if(state == CBState.redDiscard) LostCities.S.ArrangeDiscard(tCB);
                     if(state == CBState.greenDiscard) LostCities.S.ArrangeDiscard(tCB);
                     if(state == CBState.whiteDiscard) LostCities.S.ArrangeDiscard(tCB);
                     if(state == CBState.blueDiscard) LostCities.S.ArrangeDiscard(tCB);
                     if(state == CBState.yellowDiscard) LostCities.S.ArrangeDiscard(tCB);
-                    
-                    
-                    LostCities.S.ArrangePlayerPile();
-                    LostCities.S.ArrangePlayer2Pile();
-                    
+
+
+                    //Invoke("LostCities.S.ArrangePlayerPile", 2);
+                    //Invoke("LostCities.S.ArrangePlayer2Pile", 2);
+
+
+
+                    timeStart = 0;
                     //this code not used
                     if (reportFinishTo != null)
                     {

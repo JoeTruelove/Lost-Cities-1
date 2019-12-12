@@ -20,8 +20,7 @@ public class GameOverUI : MonoBehaviour {
             return;
         }
         // We only get here if the game is over
-        if (LostCities.CURRENT_PLAYER == null) return;
-        if (LostCities.CURRENT_PLAYER.type == PlayerType.human)
+        if (LostCities.S.winner && !LostCities.S.draw)
         {
             txt.text = "You won!";
         }

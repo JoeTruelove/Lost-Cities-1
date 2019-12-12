@@ -48,7 +48,7 @@ public class Score : MonoBehaviour
         {
             if(testList[i].rank == 1)
             {
-                multiplier++;
+                multiplier = multiplier + 1;
             }
         }
         

@@ -110,7 +110,7 @@ public class LostCities : MonoBehaviour
         {
             FixFace();
             AITurn();
-            
+
         }
 
         FixFace();
@@ -121,9 +121,9 @@ public class LostCities : MonoBehaviour
     public void AITurn()
     {
         finished = 0;
-        Invoke("playAI", 2);
+        Invoke("PlayAI", 2);
         //playAI();
-        Invoke("aIDoDraw", 3);
+        Invoke("AIDoDraw", 3);
 
 
     }
@@ -466,7 +466,7 @@ public class LostCities : MonoBehaviour
         }
         players[0].type = PlayerType.human; // Make only the 0th player human
         players[1].type = PlayerType.ai; // Make only the 0th player human
-        
+
         CardLostCities tCB;
         // Deal # cards to each player
         for (int i = 0; i < numStartingCards; i++)
@@ -1176,7 +1176,7 @@ public class LostCities : MonoBehaviour
 
         if (popUpGameOver)
         {
-            if (GUI.Button(new Rect(475, 750, 200, 48), "Play Again?"))
+            if (GUI.Button(new Rect(375, 650, 200, 48), "Play Again?"))
             {
 
                 RestartGame();
@@ -1187,7 +1187,7 @@ public class LostCities : MonoBehaviour
 
     }
 
-    public void playAI()
+    public void PlayAI()
     {
         Utils.tr("AI Turn");
         players[1].TakeTurn();
@@ -1208,7 +1208,7 @@ public class LostCities : MonoBehaviour
         drawPile.RemoveAt(0); // Then remove it from List<> drawPile
         ArrangeDrawPile();
         CheckGameOver();
-        if (drawPile.Count == 0)
+        if (drawPile.Count == 40)
         {
             Invoke("GameOver", 3);
         }
@@ -1218,7 +1218,7 @@ public class LostCities : MonoBehaviour
     }
 
 
-    public void aIDoDraw()
+    public void AIDoDraw()
     {
         players[1].AddCard(Draw());
     }
@@ -1366,7 +1366,7 @@ public class LostCities : MonoBehaviour
         int p2R = 20;
         int p2G = 20;
         int p2W = 20;
-        int p2B = 20; 
+        int p2B = 20;
         int p2Y = 20;
 
 
@@ -1455,31 +1455,23 @@ public class LostCities : MonoBehaviour
         p1Score = player1Score;
         p2Score = player2Score;
 
-        if (drawPile.Count == 40)
-        {
-            if (player1Score > player2Score)
-            {
-                winner = true;
-                //ScoreManager.S.state = eScoreEvent.gameWin;
-            }
-            else if (player2Score > player1Score)
-            {
-                winner = false;
-                //ScoreManager.S.state = eScoreEvent.gameLoss;
-            }
-            else if (player1Score == player2Score)
-            {
-                draw = true;
-                //ScoreManager.S.state = eScoreEvent.draw;
-            }
-            //ScoreManager.S.score = player1Score;
-            //ScoreManager.S.Event(ScoreManager.S.state);
-            //GetComponent<Text>().text = player1Score;
-            phase = TurnPhase.gameOver;
-            //Invoke("RestartGame", 10);
-            popUpGameOver = true;
 
+        if (player1Score > player2Score)
+        {
+            winner = true;
         }
+        else if (player2Score > player1Score)
+        {
+            winner = false;
+        }
+        else if (player1Score == player2Score)
+        {
+            draw = true;
+        }
+        phase = TurnPhase.gameOver;
+        popUpGameOver = true;
+
+
     }
 
 }
